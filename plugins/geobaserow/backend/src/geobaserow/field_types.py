@@ -37,10 +37,7 @@ class PointFieldType(FieldType):
         if value is None:
             return value
 
-        value = {
-            "type": "Point",
-            "coordinates": [value['lng'], value['lat']]
-        }
+        value = {"type": "Point", "coordinates": [value["lng"], value["lat"]]}
         value = json.dumps(value)
         return GEOSGeometry(value)
 

@@ -12,6 +12,6 @@ class PluginNameConfig(AppConfig):
 
         from baserow.contrib.database.fields.registries import field_type_registry
 
-        # from .field_types import PointFieldType
-        #
-        # field_type_registry.register(PointFieldType())
+        from .field_types import PointFieldType
+
+        field_type_registry.register(PointFieldType())
