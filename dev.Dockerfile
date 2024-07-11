@@ -1,7 +1,7 @@
 # This a dev image for testing your plugin when installed into the Baserow all-in-one image
-FROM baserow/baserow:1.26.0 as base
+FROM baserow/baserow:1.26.1 as base
 
-FROM baserow/baserow:1.26.0
+FROM baserow/baserow:1.26.1
 
 ARG PLUGIN_BUILD_UID
 ENV PLUGIN_BUILD_UID=${PLUGIN_BUILD_UID:-9999}
@@ -16,7 +16,9 @@ RUN groupmod -o -g $PLUGIN_BUILD_GID baserow_docker_group && usermod -u $PLUGIN_
 
 # Install your dev dependencies manually.
 COPY --chown=$PLUGIN_BUILD_UID:$PLUGIN_BUILD_GID ./plugins/geobaserow/backend/requirements/dev.txt /tmp/plugin-dev-requirements.txt
-RUN . /baserow/venv/bin/activate && pip3 install -r /tmp/plugin-dev-requirements.txt && chown -R $PLUGIN_BUILD_UID:$PLUGIN_BUILD_GID /baserow/venv
+ENV PIP_CACHE_DIR=/tmp/baserow_pip_cache
+RUN --mount=type=cache,mode=777,target=$PIP_CACHE_DIR,uid=$UID,gid=$GID . /baserow/venv/bin/activate && \
+    pip3 install -r /tmp/plugin-dev-requirements.txt && chown -R $PLUGIN_BUILD_UID:$PLUGIN_BUILD_GID /baserow/venv
 
 COPY --chown=$PLUGIN_BUILD_UID:$PLUGIN_BUILD_GID ./plugins/geobaserow/ $BASEROW_PLUGIN_DIR/geobaserow/
 RUN /baserow/plugins/install_plugin.sh --folder $BASEROW_PLUGIN_DIR/geobaserow --dev

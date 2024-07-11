@@ -1,10 +1,8 @@
-def setup(settings):
-    """
-    This function is called after Baserow as setup its own Django settings file but
-    before Django starts. Read and modify provided settings object as appropriate
-    just like you would in a normal Django settings file. E.g.:
+# Imported automatically by the Baserow backend before after other django settings files
+# are imported.
 
-    settings.INSTALLED_APPS += ["some_custom_plugin_dep"]
-    for db, value in settings.DATABASES:
-        value['engine'] = 'some custom engine'
-    """
+def setup(settings):
+    settings.INSTALLED_APPS += ['django.contrib.gis', 'rest_framework_gis']
+
+    for db, value in settings.DATABASES.items():
+        settings.DATABASES[db]['ENGINE'] = 'django.contrib.gis.db.backends.postgis'

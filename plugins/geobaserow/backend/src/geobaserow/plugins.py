@@ -1,4 +1,3 @@
-from loguru import logger
 from baserow.core.registries import Plugin
 from django.urls import path, include
 

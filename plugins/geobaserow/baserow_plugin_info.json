@@ -1,7 +1,7 @@
 {
   "name": "GeoBaserow",
   "version": "0.0.1",
-  "supported_baserow_versions": "1.26.0",
+  "supported_baserow_versions": "1.26.1",
   "plugin_api_version": "0.0.1-alpha",
   "description": "A plugin that adds geospatial capabilities to Baserow",
   "author": "Erick Otenyo",

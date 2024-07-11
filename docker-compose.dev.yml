@@ -6,7 +6,6 @@ services:
   geobaserow:
     container_name: geobaserow
     image: geobaserow_dev
-    platform: linux/x86_64
     build:
       dockerfile: ./dev.Dockerfile
       context: .
@@ -19,7 +18,10 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      BASEROW_PUBLIC_URL: http://localhost
+      BASEROW_PUBLIC_URL: $BASEROW_PUBLIC_URL
+      BASEROW_IMAGE_TYPE: "all-in-one"
+      BASEROW_EMBEDDED_PSQL: true
+      BASEROW_OSS_ONLY: true
     volumes:
       - baserow_data:/baserow/data
       - ./plugins/geobaserow/backend:/baserow/data/plugins/geobaserow/backend
