@@ -111,3 +111,6 @@ vetur.config.js
 
 .coverage
 junit.xml
+
+container_markers
+plugins/geobaserow/backend/build

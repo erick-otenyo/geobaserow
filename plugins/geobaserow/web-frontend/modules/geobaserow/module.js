@@ -14,4 +14,6 @@ export default function () {
     src: path.resolve(__dirname, 'plugin.js'),
   })
   this.options.css.push(path.resolve(__dirname, 'assets/scss/default.scss'))
+
+  this.requireModule('nuxt-leaflet')
 }

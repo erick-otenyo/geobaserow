@@ -31,13 +31,12 @@ class PointFieldType(FieldType):
         if not geo:
             return None
         else:
-            return geo.wkt
+            return geo.geojson
 
     def prepare_value_for_db(self, instance, value):
         if value is None:
             return value
 
-        value = {"type": "Point", "coordinates": [value["lng"], value["lat"]]}
         value = json.dumps(value)
         return GEOSGeometry(value)
 

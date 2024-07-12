@@ -7,12 +7,14 @@ from rest_framework_gis.serializers import GeometryField
 
 class GeometryPointFieldSerializerField(GeometryField):
     def to_internal_value(self, value):
-        value = {"type": "Point", "coordinates": [value["lng"], value["lat"]]}
+        if value.get("type") is None:
+            return None
+
+        if value.get("coordinates") is None:
+            return None
+
         value = json.dumps(value)
         return GEOSGeometry(value)
-
-    def to_representation(self, value):
-        return value.wkt
 
     def run_validation(self, data=empty):
         """

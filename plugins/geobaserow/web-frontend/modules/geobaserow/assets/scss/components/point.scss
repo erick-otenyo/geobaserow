@@ -1,0 +1,17 @@
+.grid-field-point__cell {
+    user-select: none;
+    z-index: 1;
+  }
+  
+  .grid-field-point__cell.active{
+    min-height: 200px;
+    min-width: 200px;
+    z-index: 100;
+  }
+
+  .field-point {
+    height: 300px;
+    min-width: 200px;
+    z-index: 100;
+  }
+  
