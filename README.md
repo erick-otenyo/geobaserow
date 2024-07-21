@@ -1,6 +1,6 @@
 # GeoBaserow
 
-A plugin that adds Geospatial capabilities to Baserow.
+A plugin that adds Geospatial capabilities to [Baserow](https://baserow.io).
 
 ## How to run GeoBaserow using Docker-compose
 
