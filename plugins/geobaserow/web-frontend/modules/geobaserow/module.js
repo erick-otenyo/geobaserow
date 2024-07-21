@@ -2,7 +2,15 @@ import path from 'path'
 
 import { routes } from './routes'
 
+import en from './locales/en.json'
+
 export default function () {
+
+
+  this.nuxt.hook('i18n:extend-messages', (additionalMessages) => {
+    additionalMessages.push({ en })
+  })
+
   this.options.alias['@geobaserow'] = path.resolve(
     __dirname,
     './'

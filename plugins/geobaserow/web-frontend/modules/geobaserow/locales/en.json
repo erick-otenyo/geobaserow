@@ -1,0 +1,15 @@
+{
+    "geoFieldSelectForm": {
+        "geoField": "Which field would you like to use for this view?",
+        "noCompatibleGeoFields": "There are no geo fields in this table, please create one first."
+    },
+    "selectGeoFieldModal": {
+        "chooseGeoField": "Choose Geo field",
+        "save": "Save"
+    },
+    "mapViewHeader": {
+        "displayBy": "Display by",
+        "displayedBy": "Displayed by “{fieldName}” field",
+        "labels": "Labels"
+    }
+}

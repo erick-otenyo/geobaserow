@@ -6,12 +6,14 @@ class PluginNameConfig(AppConfig):
     name = "geobaserow"
 
     def ready(self):
+        from baserow.contrib.database.fields.registries import field_type_registry
+        from baserow.contrib.database.views.registries import view_type_registry
+
         from .plugins import PluginNamePlugin
+        from .views.view_types import MapViewType
+        from .fields.field_types import PointFieldType
 
         plugin_registry.register(PluginNamePlugin())
 
-        from baserow.contrib.database.fields.registries import field_type_registry
-
-        from .field_types import PointFieldType
-
         field_type_registry.register(PointFieldType())
+        view_type_registry.register(MapViewType())

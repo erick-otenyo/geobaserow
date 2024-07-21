@@ -1,5 +1,14 @@
-from baserow.contrib.database.fields.models import Field
+from .fields.models import (
+    PointField
+)
 
+from .views.models import (
+    MapView,
+    MapViewFieldOptions
+)
 
-class PointField(Field):
-    pass
+__all__ = [
+    "MapView",
+    "MapViewFieldOptions",
+    "PointField"
+]

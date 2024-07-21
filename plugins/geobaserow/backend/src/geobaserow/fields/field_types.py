@@ -15,6 +15,7 @@ class PointFieldType(FieldType):
     model_class = PointField
     allowed_fields = []
     serializer_field_names = []
+    is_geo = True
 
     def get_serializer_field(self, instance, **kwargs):
         required = kwargs.get("required", False)

@@ -8,6 +8,7 @@ import {
 import FunctionalGridViewFieldPoint from '@geobaserow/components/FunctionalGridViewFieldPoint'
 import GridViewFieldPoint from '@geobaserow/components/GridViewFieldPoint'
 import RowEditFieldPoint from '@geobaserow/components/RowEditFieldPoint'
+import RowCardFieldPoint from '@geobaserow/components/RowCardFieldPoint'
 
 export class PointFieldType extends FieldType {
     static getType() {
@@ -39,7 +40,7 @@ export class PointFieldType extends FieldType {
     }
 
     getCardComponent() {
-        return RowCardFieldText
+        return RowCardFieldPoint
     }
 
     getEmptyValue(field) {
@@ -76,4 +77,9 @@ export class PointFieldType extends FieldType {
     canBeReferencedByFormulaField() {
         return true
     }
+
+    canRepresentGeo() {
+        return true
+    }
+
 }
