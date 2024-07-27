@@ -1,6 +1,3 @@
-from collections import OrderedDict
-from http.client import responses
-
 from baserow.api.decorators import (
     allowed_includes,
     map_exceptions,
@@ -17,17 +14,12 @@ from baserow.contrib.database.api.fields.errors import (
     ERROR_ORDER_BY_FIELD_NOT_POSSIBLE,
 )
 from baserow.contrib.database.api.rows.serializers import (
-    RowSerializer,
     get_example_row_metadata_field_serializer,
     get_example_row_serializer_class,
-    get_row_serializer_class,
 )
 from baserow.contrib.database.api.views.errors import (
     ERROR_VIEW_FILTER_TYPE_DOES_NOT_EXIST,
     ERROR_VIEW_FILTER_TYPE_UNSUPPORTED_FIELD,
-)
-from baserow.contrib.database.api.views.gallery.serializers import (
-    GalleryViewFieldOptionsSerializer,
 )
 from baserow.contrib.database.api.views.serializers import FieldOptionsField
 from baserow.contrib.database.fields.exceptions import (
@@ -35,7 +27,6 @@ from baserow.contrib.database.fields.exceptions import (
     OrderByFieldNotFound,
     OrderByFieldNotPossible,
 )
-from baserow.contrib.database.rows.registries import row_metadata_registry
 from baserow.contrib.database.table.operations import ListRowsDatabaseTableOperationType
 from baserow.contrib.database.views.exceptions import (
     ViewDoesNotExist,
@@ -49,20 +40,24 @@ from baserow.contrib.database.views.registries import (
 from baserow.contrib.database.views.signals import view_loaded
 from baserow.core.exceptions import UserNotInWorkspace
 from baserow.core.handler import CoreHandler
+from django.db import connections, DEFAULT_DB_ALIAS
 from drf_spectacular.openapi import OpenApiParameter, OpenApiTypes
 from drf_spectacular.utils import extend_schema
+from geobaserow.views.exceptions import MapViewHasNoGeoField
 from geobaserow.views.models import MapView
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from geobaserow.views.exceptions import MapViewHasNoGeoField
 
 from .errors import ERROR_MAP_DOES_NOT_EXIST
+from .renderers import BinaryRenderer
+from .serializers import MapViewFieldOptionsSerializer
 
 
 class MapViewView(APIView):
     permission_classes = (AllowAny,)
+    renderer_classes = (BinaryRenderer,)
 
     @extend_schema(
         parameters=[
@@ -72,6 +67,24 @@ class MapViewView(APIView):
                 type=OpenApiTypes.INT,
                 description="Returns only rows that belong to the related view's "
                             "table.",
+            ),
+            OpenApiParameter(
+                name="z",
+                location=OpenApiParameter.PATH,
+                type=OpenApiTypes.INT,
+                description="Z",
+            ),
+            OpenApiParameter(
+                name="x",
+                location=OpenApiParameter.PATH,
+                type=OpenApiTypes.INT,
+                description="X",
+            ),
+            OpenApiParameter(
+                name="y",
+                location=OpenApiParameter.PATH,
+                type=OpenApiTypes.INT,
+                description="Y",
             ),
             OpenApiParameter(
                 name="include",
@@ -115,12 +128,12 @@ class MapViewView(APIView):
                 ),
                 additional_fields={
                     "field_options": FieldOptionsField(
-                        serializer_class=GalleryViewFieldOptionsSerializer,
+                        serializer_class=MapViewFieldOptionsSerializer,
                         required=False,
                     ),
                     "row_metadata": get_example_row_metadata_field_serializer(),
                 },
-                serializer_name="PaginationSerializerWithGalleryViewFieldOptions",
+                serializer_name="SerializerWithMapViewFieldOptions",
             ),
             400: get_error_schema(
                 [
@@ -153,11 +166,15 @@ class MapViewView(APIView):
             self,
             request: Request,
             view_id: int,
+            z: int,
+            x: int,
+            y: int,
             field_options: bool,
             row_metadata: bool,
             query_params,
     ):
-        """Responds with the rows for the map view."""
+
+        """Responds with the rows for the map view on mvt format"""
 
         view_handler = ViewHandler()
         view = view_handler.get_view_as_user(request.user, view_id, MapView, )
@@ -188,28 +205,47 @@ class MapViewView(APIView):
             search_mode=search_mode,
         )
 
-        serializer_class = get_row_serializer_class(
-            model, RowSerializer, is_response=True
-        )
-        serializer = serializer_class(queryset, many=True)
+        table_name = view.table.get_database_table_name()
+        geo_field_name = f"field_{view.geo_field.id}"
 
-        response = Response(OrderedDict([
-            ('count', queryset.count()),
-            ('results', serializer.data)
-        ]))
+        # filter out null geo columns
+        queryset = queryset.filter(**{f"{geo_field_name}__isnull": False})
 
-        if field_options:
-            context = {"fields": [o["field"] for o in model._field_objects.values()]}
-            serializer_class = view_type.get_field_options_serializer_class(
-                create_if_missing=True
-            )
-            response.data.update(**serializer_class(view, context=context).data)
+        fields = model._field_objects
+        non_geo_fields = []
+        for key, field in fields.items():
+            is_geo = hasattr(field.get("type"), "is_geo") and field.get("type").is_geo
+            if not is_geo:
+                non_geo_fields.append(field.get("name"))
 
-        if row_metadata:
-            row_metadata = row_metadata_registry.generate_and_merge_metadata_for_rows(
-                request.user, view.table, (row.id for row in queryset)
-            )
-            response.data.update(row_metadata=row_metadata)
+        # include only non-geo columns
+        queryset = queryset.only(*non_geo_fields)
+
+        full_geo_field_name = f"{table_name}.{geo_field_name}"
+
+        sql, params = queryset.query.sql_with_params()
+        select_statement = sql.split("FROM")[0].lstrip("SELECT ").strip() + ","
+        extra_wheres = " AND " + sql.split("WHERE")[1].strip() if params else ""
+
+        query = f"""
+            WITH bounds AS (
+                SELECT ST_TileEnvelope(%s, %s, %s) AS geom
+            ),
+            mvtgeom AS ( 
+                SELECT {select_statement} ST_AsMVTGeom(ST_Transform({full_geo_field_name}, 3857), bounds.geom) AS geom
+                FROM {table_name}, bounds
+                WHERE ST_Intersects(ST_Transform({full_geo_field_name}, 4326), ST_Transform(bounds.geom, 4326)){extra_wheres}
+                )
+                SELECT ST_AsMVT(mvtgeom, 'default') FROM mvtgeom;
+        """
+
+        connection = connections[DEFAULT_DB_ALIAS]
+
+        with connection.cursor() as cursor:
+            cursor.execute(query, (z, x, y))
+            mvt = cursor.fetchone()[0]
+
+            mvt_bytes = mvt.tobytes() if isinstance(mvt, memoryview) else mvt or b""
 
         view_loaded.send(
             sender=self,
@@ -219,4 +255,4 @@ class MapViewView(APIView):
             user=request.user,
         )
 
-        return response
+        return Response(mvt_bytes, content_type="application/vnd.mapbox-vector-tile")

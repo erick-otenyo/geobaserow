@@ -37,8 +37,8 @@
       >
         <i class="header__filter-icon iconoir-list"></i>
         <span class="header__filter-name">{{
-          $t('mapViewHeader.labels')
-        }}</span>
+            $t('mapViewHeader.popupFields')
+          }}</span>
       </a>
       <ViewFieldsContext
         ref="customizeContext"

@@ -1,81 +1,86 @@
 <template>
-    <div>Hello Map</div>
-  </template>
-  
-  <script>
+  <Map
+      :tile-url="tilesUrl"
+
+  />
+</template>
+
+<script>
 
 
 import viewHelpers from '@baserow/modules/database/mixins/viewHelpers'
-import { mapGetters } from 'vuex'
-import { populateRow } from '@baserow/modules/database/store/view/grid'
-import { clone } from '@baserow/modules/core/utils/object'
+import {mapGetters} from 'vuex'
+
+import Map from '@geobaserow/components/Map.vue';
 
 
 export default {
-    name: 'MapView',
-    mixins: [viewHelpers],
-    props: {
-        primary: {
-            type: Object,
-            required: true,
-        },
-        fields: {
-            type: Array,
-            required: true,
-        },
-        view: {
-            type: Object,
-            required: true,
-        },
-        table: {
-            type: Object,
-            required: true,
-        },
-        database: {
-            type: Object,
-            required: true,
-        },
-        readOnly: {
-            type: Boolean,
-            required: true,
-        },
-        loading: {
-            type: Boolean,
-            required: true,
-        },
-        storePrefix: {
-            type: String,
-            required: true,
-        },
+  name: 'MapView',
+  mixins: [viewHelpers],
+  components: {
+    Map,
+  },
+  props: {
+    fields: {
+      type: Array,
+      required: true,
     },
-    data() {
-        return {
-            showHiddenFieldsInRowModal: false,
-            selectedRow: null,
-        }
+    view: {
+      type: Object,
+      required: true,
     },
-    computed: {
-        hiddenFields() {
-            return this.fields
-                .filter(filterHiddenFieldsFunction(this.fieldOptions))
-                .sort(sortFieldsByOrderAndIdFunction(this.fieldOptions))
-        },
+    table: {
+      type: Object,
+      required: true,
     },
-    beforeCreate() {
-        this.$options.computed = {
-            ...(this.$options.computed || {}),
-            ...mapGetters({
-                allRows:
-                    this.$options.propsData.storePrefix + 'view/map/getAllRows',
-                fieldOptions:
-                    this.$options.propsData.storePrefix +
-                    'view/map/getAllFieldOptions',
-                getGeoField:
-                    this.$options.propsData.storePrefix + 'view/calendar/getGeoField',
-            }),
-        }
+    database: {
+      type: Object,
+      required: true,
     },
-    methods: {
+    readOnly: {
+      type: Boolean,
+      required: true,
     },
+    loading: {
+      type: Boolean,
+      required: true,
+    },
+    storePrefix: {
+      type: String,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      showHiddenFieldsInRowModal: false,
+    }
+  },
+  computed: {
+    hiddenFields() {
+      return this.fields
+          .filter(filterHiddenFieldsFunction(this.fieldOptions))
+          .sort(sortFieldsByOrderAndIdFunction(this.fieldOptions))
+    },
+    tilesUrl() {
+      const baseUrl = this.$client.defaults.baseURL
+      return baseUrl + `/database/views/map/${this.view.id}/tiles/{z}/{x}/{y}/`
+    }
+  },
+  beforeCreate() {
+    this.$options.computed = {
+      ...(this.$options.computed || {}),
+      ...mapGetters({
+        fieldOptions:
+            this.$options.propsData.storePrefix +
+            'view/map/getAllFieldOptions',
+        getGeoField:
+            this.$options.propsData.storePrefix + 'view/map/getGeoField',
+      }),
+    }
+  },
+  mounted() {
+    console.log(this.tilesUrl)
+  },
+  methods: {},
 }
 </script>
