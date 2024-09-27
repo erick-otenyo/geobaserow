@@ -225,7 +225,7 @@ class MapViewView(APIView):
 
         sql, params = queryset.query.sql_with_params()
         select_statement = sql.split("FROM")[0].lstrip("SELECT ").strip() + ","
-        extra_wheres = " AND " + sql.split("WHERE")[1].strip() if params else ""
+        where_statement = " AND " + sql.split("WHERE")[1].strip()
 
         query = f"""
             WITH bounds AS (
@@ -234,7 +234,7 @@ class MapViewView(APIView):
             mvtgeom AS ( 
                 SELECT {select_statement} ST_AsMVTGeom(ST_Transform({full_geo_field_name}, 3857), bounds.geom) AS geom
                 FROM {table_name}, bounds
-                WHERE ST_Intersects(ST_Transform({full_geo_field_name}, 4326), ST_Transform(bounds.geom, 4326)){extra_wheres}
+                WHERE ST_Intersects(ST_Transform({full_geo_field_name}, 4326), ST_Transform(bounds.geom, 4326)){where_statement}
                 )
                 SELECT ST_AsMVT(mvtgeom, 'default') FROM mvtgeom;
         """
@@ -242,7 +242,10 @@ class MapViewView(APIView):
         connection = connections[DEFAULT_DB_ALIAS]
 
         with connection.cursor() as cursor:
-            cursor.execute(query, (z, x, y))
+            query_params = [z, x, y]
+            if params:
+                query_params += list(params)
+            cursor.execute(query, query_params)
             mvt = cursor.fetchone()[0]
 
             mvt_bytes = mvt.tobytes() if isinstance(mvt, memoryview) else mvt or b""
