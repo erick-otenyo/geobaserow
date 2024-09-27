@@ -1,12 +1,6 @@
 import Vue from 'vue'
 import ViewService from '@baserow/modules/database/services/view'
 
-import MapService from '@geobaserow/services/views/map'
-
-import {getDefaultSearchModeFromEnv} from '@baserow/modules/database/utils/search'
-
-import {extractRowMetadata} from '@baserow/modules/database/utils/view'
-
 
 export function populateRow(row, metadata = {}) {
     row._ = {
@@ -16,10 +10,14 @@ export function populateRow(row, metadata = {}) {
 }
 
 export const state = () => ({
-    loading: false, loadingRows: false, // The map view id that is being displayed
-    lastMapId: null, rows: [], // The chosen geo field that the
+    loading: false,
+    loadingRows: false, // The map view id that is being displayed
+    lastMapId: null,
+    rows: [], // The chosen geo field that the
     // items will be organized by in the view
-    geoFieldId: null, fieldOptions: {},
+    geoFieldId: null,
+    fieldOptions: {},
+    mapRefreshCount: 0
 })
 
 export const mutations = {
@@ -37,6 +35,9 @@ export const mutations = {
     },
     SET_LAST_MAP_ID(state, mapId) {
         state.lastMapId = mapId
+    },
+    UPDATE_MAP_REFRESH_COUNT(state) {
+        state.mapRefreshCount = state.mapRefreshCount + 1
     },
     SET_GEO_FIELD_ID(state, geoFieldId) {
         state.geoFieldId = geoFieldId
@@ -75,10 +76,18 @@ export const actions = {
      * a new view etc.
      * rows.
      */
-    async refresh({dispatch, commit, getters}, {mapId, geoFieldId, fields, includeFieldOptions = true}) {
+    async refresh({dispatch, commit, getters}, {
+        mapId,
+        geoFieldId,
+        fields,
+        includeFieldOptions = true
+    }) {
+
         commit('RESET')
         commit('SET_GEO_FIELD_ID', geoFieldId)
         commit('SET_LAST_MAP_ID', mapId)
+
+        commit("UPDATE_MAP_REFRESH_COUNT")
     },
     /**
      * Updates the field options of a given field in the store. So no API request to
@@ -183,31 +192,39 @@ export const actions = {
             }
         }
     },
-
 }
 
 
 export const getters = {
     getServerSearchTerm(state) {
         return state.activeSearchTerm
-    }, getActiveSearchTerm(state) {
+    },
+    getActiveSearchTerm(state) {
         return state.activeSearchTerm
-    }, isHidingRowsNotMatchingSearch(state) {
+    },
+    isHidingRowsNotMatchingSearch(state) {
         return state.hideRowsNotMatchingSearch
-    }, getLastMapId(state) {
+    },
+    getLastMapId(state) {
         return state.lastMapId
-    }, getGeoFieldIdIfNotTrashed: (state, getters) => (fields) => {
+    },
+    getGeoFieldIdIfNotTrashed: (state, getters) => (fields) => {
         return getters.getGeoField(fields)?.id
-    }, getAllFieldOptions(state) {
+    },
+    getAllFieldOptions(state) {
         return state.fieldOptions
-    }, getGeoField: (state) => (fields) => {
+    },
+    getGeoField: (state) => (fields) => {
         const fieldId = state.geoFieldId
         if (fieldId) {
             return fields.find((field) => field.id === fieldId)
         } else {
             return null
         }
-    }
+    },
+    getMapRefreshCount(state) {
+        return state.mapRefreshCount
+    },
 }
 
 export default {

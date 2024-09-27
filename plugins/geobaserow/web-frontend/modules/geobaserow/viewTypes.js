@@ -50,6 +50,7 @@ export class MapViewType extends ViewType {
         if (['field_deleted', 'field_updated'].includes(sourceEvent?.type) && sourceEvent?.data?.field_id === geoFieldId) {
             return
         }
+
         await store.dispatch(storePrefix + 'view/map/refresh', {
             mapId: view.id, geoFieldId: view.geo_field, fields, includeFieldOptions,
         })
