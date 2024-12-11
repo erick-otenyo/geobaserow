@@ -1,59 +1,11 @@
 <template>
-  <div ref="mapContainer" class="map-container"></div>
+  <div ref="mapContainer" class="map-view-container"></div>
 </template>
 
 <script>
-import maplibre from 'maplibre-gl';
+import maplibregl from 'maplibre-gl';
+
 import {prepareRequestHeaders} from "@geobaserow/utils";
-
-const defaultStyle = {
-  'version': 8,
-  "glyphs": "https://tiles.basemaps.cartocdn.com/fonts/{fontstack}/{range}.pbf",
-  'sources': {
-    'carto-dark': {
-      'type': 'raster',
-      'tiles': [
-        "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
-        "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
-        "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
-        "https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png"
-      ]
-    },
-    'carto-light': {
-      'type': 'raster',
-      'tiles': [
-        "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png",
-        "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png",
-        "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png",
-        "https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png"
-      ]
-    },
-    'voyager': {
-      'type': 'raster',
-      'tiles': [
-        "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png",
-        "https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png",
-        "https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png",
-        "https://d.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png",
-
-      ]
-    },
-    'wikimedia': {
-      'type': 'raster',
-      'tiles': [
-        "https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png"
-      ]
-    },
-  },
-  'layers': [{
-    'id': 'carto-voyager-layer',
-    'source': 'voyager',
-    'type': 'raster',
-    'minzoom': 0,
-    'maxzoom': 22
-  }]
-}
-
 
 export default {
   name: 'Map',
@@ -69,12 +21,13 @@ export default {
   },
   methods: {
     initializeMap() {
+
       const baseURL = this.$client.defaults.baseURL
       const headers = prepareRequestHeaders(this.$store)
 
-      this.map = new maplibre.Map({
+      this.map = new maplibregl.Map({
         container: this.$refs.mapContainer,
-        style: defaultStyle,
+        style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
         center: [0, 0],
         zoom: 2,
         // adding authorization to tile urls
@@ -90,6 +43,9 @@ export default {
           }
         }
       });
+
+      // Add navigation controls
+      this.map.addControl(new maplibregl.NavigationControl({showCompass: false}), "top-right");
 
 
       this.map.on("load", () => {
@@ -113,17 +69,13 @@ export default {
           });
         }
       })
-
-
     },
   },
 };
 </script>
 
 <style>
-
-
-.map-container {
+.map-view-container {
   width: 100%;
   height: 100%;
 }

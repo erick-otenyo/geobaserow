@@ -16,7 +16,7 @@ class MapView(View):
         help_text="One of the supported geo fields that "
                   "the map view will be based on.",
     )
-
+    
     class Meta:
         db_table = "geobaserow_mapview"
 
@@ -26,7 +26,7 @@ class MapViewFieldOptionsManager(models.Manager):
     The View can be trashed and the field options are not deleted, therefore
     we need to filter out the trashed views.
     """
-
+    
     def get_queryset(self):
         trashed_Q = Q(map_view__trashed=True) | Q(field__trashed=True)
         return super().get_queryset().filter(~trashed_Q)
@@ -35,7 +35,7 @@ class MapViewFieldOptionsManager(models.Manager):
 class MapViewFieldOptions(HierarchicalModelMixin, models.Model):
     objects = MapViewFieldOptionsManager()
     objects_and_trash = models.Manager()
-
+    
     map_view = models.ForeignKey(MapView, on_delete=models.CASCADE)
     field = models.ForeignKey(Field, on_delete=models.CASCADE)
     hidden = models.BooleanField(
@@ -48,10 +48,10 @@ class MapViewFieldOptions(HierarchicalModelMixin, models.Model):
         default=32767,
         help_text="The order that the field has in the view. Lower value is first.",
     )
-
+    
     def get_parent(self):
         return self.map_view
-
+    
     class Meta:
         db_table = "geobaserow_mapviewfieldoptions"
         ordering = ("order", "field_id")

@@ -11,5 +11,31 @@
     "displayBy": "Display by",
     "displayedBy": "Displayed by “{fieldName}” field",
     "popupFields": "Popup Fields"
+  },
+  "importerType": {
+    "geojson": "Import a GeoJSON file"
+  },
+  "tableGeoJSONImporter": {
+    "fileLabel": "Choose GeoJSON file",
+    "fileDescription": "You can import an existing GeoJSON file by uploading the .geojson/.json file with tabular data, i.e.:",
+    "chooseButton": "Choose GeoJSON file",
+    "encodingLabel": "Encoding",
+    "processingError": "Error occurred while parsing GeoJSON: {error}",
+    "arrayError": "The GeoJSON file is not an array.",
+    "emptyError": "This GeoJSON file is empty.",
+    "limitFileSize": "The maximum file size is {limit}MB.",
+    "limitError": "It is not possible to import more than {limit} rows.",
+    "validError": "The GeoJSON file is not valid.",
+    "reservedGeomColumnNameError": "The column name 'geom' is reserved for the geometry column. Rename the column to something else."
+  },
+  "fieldGeoSubForm": {
+    "mapSettingsLabel": "Map settings",
+    "defaultCenterLabel": "Default center",
+    "defaultCenterHelperText": "Click on the map to set the default center",
+    "defaultZoomLabel": "Default zoom",
+    "baseMapLabel": "Base map",
+    "baseMapVoyager": "Voyager - Colored map",
+    "baseMapPositron": "Positron - Light gray map",
+    "baseMapDarkMatter": "Dark Matter - Dark gray map"
   }
 }

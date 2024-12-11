@@ -1,1 +1,14 @@
 @import 'maplibre-gl/dist/maplibre-gl.css';
+@import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
+
+.map-field-container {
+  height: 300px;
+  min-width: 200px;
+  z-index: 10;
+  border: 1px solid #d7d8d9;
+  box-shadow: 0 1px 2px 0 rgba(7, 8, 16, 0.1);
+}
+
+.dropdown__items {
+  z-index: 100;
+}

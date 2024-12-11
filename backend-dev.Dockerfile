@@ -1,7 +1,7 @@
 # This a dev image for testing your plugin when installed into the Baserow backend image
-FROM baserow/backend:1.26.0 as base
+FROM baserow/backend:1.29.3 AS base
 
-FROM baserow/backend:1.26.0
+FROM baserow/backend:1.29.3
 
 USER root
 
@@ -21,6 +21,8 @@ RUN . /baserow/venv/bin/activate && pip3 install -r /tmp/plugin-dev-requirements
 
 COPY --chown=$PLUGIN_BUILD_UID:$PLUGIN_BUILD_GID ./plugins/geobaserow/ $BASEROW_PLUGIN_DIR/geobaserow/
 RUN /baserow/plugins/install_plugin.sh --folder $BASEROW_PLUGIN_DIR/geobaserow --dev
+
+ENV PATH="/baserow/venv/bin:$PATH"
 
 USER $PLUGIN_BUILD_UID:$PLUGIN_BUILD_GID
 ENV DJANGO_SETTINGS_MODULE='baserow.config.settings.dev'

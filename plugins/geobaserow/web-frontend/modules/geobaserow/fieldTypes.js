@@ -1,50 +1,30 @@
-import { FieldType } from '@baserow/modules/database/fieldTypes'
+import {FieldType} from '@baserow/modules/database/fieldTypes'
 import FieldTextSubForm from '@baserow/modules/database/components/field/FieldTextSubForm'
-import RowCardFieldText from '@baserow/modules/database/components/card/RowCardFieldText'
-import {
-    genericContainsFilter,
-} from '@baserow/modules/database/utils/fieldFilters'
+import FieldGeoSubForm from '@geobaserow/components/field/FieldGeoSubForm'
+import {genericContainsFilter,} from '@baserow/modules/database/utils/fieldFilters'
 
-import FunctionalGridViewFieldPoint from '@geobaserow/components/FunctionalGridViewFieldPoint'
-import GridViewFieldPoint from '@geobaserow/components/GridViewFieldPoint'
+import FunctionalGridViewFieldGeometry from '@geobaserow/components/FunctionalGridViewFieldGeometry'
+import RowCardFieldGeometry from '@geobaserow/components/RowCardFieldGeometry'
+
 import RowEditFieldPoint from '@geobaserow/components/RowEditFieldPoint'
-import RowCardFieldPoint from '@geobaserow/components/RowCardFieldPoint'
+import RowEditFieldMultiPolygon from '@geobaserow/components/RowEditFieldMultiPolygon'
 
-export class PointFieldType extends FieldType {
-    static getType() {
-        return 'point'
-    }
 
-    getIconClass() {
-        return 'globe'
-    }
-
-    getName() {
-        return 'Point'
-    }
-
-    getFormComponent() {
-        return FieldTextSubForm
-    }
-
+class GeometryFieldType extends FieldType {
     getGridViewFieldComponent() {
-        return GridViewFieldPoint
+        return FunctionalGridViewFieldGeometry
     }
 
     getFunctionalGridViewFieldComponent() {
-        return FunctionalGridViewFieldPoint
-    }
-
-    getRowEditFieldComponent() {
-        return RowEditFieldPoint
+        return FunctionalGridViewFieldGeometry
     }
 
     getCardComponent() {
-        return RowCardFieldPoint
+        return RowCardFieldGeometry
     }
 
-    getEmptyValue(field) {
-        return field
+    getFormComponent() {
+        return FieldGeoSubForm
     }
 
     getSort(name, order) {
@@ -78,8 +58,48 @@ export class PointFieldType extends FieldType {
         return true
     }
 
+    getEmptyValue(field) {
+        return field
+    }
+
     canRepresentGeo() {
         return true
     }
+}
 
+
+export class PointFieldType extends GeometryFieldType {
+    static getType() {
+        return 'point'
+    }
+
+    getIconClass() {
+        return 'globe'
+    }
+
+    getName() {
+        return 'Point'
+    }
+
+    getRowEditFieldComponent() {
+        return RowEditFieldPoint
+    }
+}
+
+export class MultiPolygonFieldType extends GeometryFieldType {
+    static getType() {
+        return 'multipolygon'
+    }
+
+    getIconClass() {
+        return 'globe'
+    }
+
+    getName() {
+        return 'MultiPolygon'
+    }
+
+    getRowEditFieldComponent() {
+        return RowEditFieldMultiPolygon
+    }
 }
