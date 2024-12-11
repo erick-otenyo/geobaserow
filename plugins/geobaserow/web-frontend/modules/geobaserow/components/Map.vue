@@ -15,9 +15,30 @@ export default {
       required: false,
       default: null,
     },
+    mapRefreshCount: {
+      type: Number,
+      required: false,
+      default: null
+    }
   },
   mounted() {
     this.initializeMap();
+  },
+  watch: {
+    mapRefreshCount: {
+      handler() {
+        const sourceId = "vector"
+
+        // Remove the tiles for the updated source from the map cache.
+        this.map.style.sourceCaches[sourceId].clearTiles();
+
+        // Load the new tiles for the updated source within the current viewport.
+        this.map.style.sourceCaches[sourceId].update(this.map.transform);
+
+        // Trigger a repaint of the map to display the updated tiles.
+        this.map.triggerRepaint();
+      },
+    },
   },
   methods: {
     initializeMap() {

@@ -1,7 +1,7 @@
 <template>
   <Map
       :tile-url="tilesUrl"
-
+      :map-refresh-count="mapRefreshCount"
   />
 </template>
 
@@ -75,6 +75,8 @@ export default {
             'view/map/getAllFieldOptions',
         getGeoField:
             this.$options.propsData.storePrefix + 'view/map/getGeoField',
+        mapRefreshCount: this.$options.propsData.storePrefix +
+            'view/map/getMapRefreshCount',
       }),
     }
   },
